@@ -56,7 +56,10 @@ jobs:
           host: ${{ secrets.O2SWITCH_HOST }}
           username: ${{ secrets.O2SWITCH_USERNAME }}
           key: ${{ secrets.O2SWITCH_KEY }}
-          port: 21
+          key_pass: ${{ secrets.O2SWITCH_KEY_PASS }}
+          port: ${{ secrets.O2SWITCH_SSH_PORT || 22 }}
+          timeout: 30s
+          command_timeout: 60s
           script: |
             cd ${{ secrets.O2SWITCH_PATH }}/backend
             tar -xzf node_modules.tar.gz
