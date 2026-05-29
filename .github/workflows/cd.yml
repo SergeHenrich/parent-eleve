@@ -1,0 +1,50 @@
+name: CD
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    name: Déploiement vers O2SWITCH
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build frontend
+        run: |
+          npm ci
+          npm run build
+        working-directory: frontend
+
+      - name: Install backend deps (production)
+        run: npm ci --omit=dev
+        working-directory: backend
+
+      - name: Déployer via rsync over SSH
+        uses: burnett01/rsync-deployments@7.0.2
+        with:
+          switches: -avz --delete --exclude='.env' --exclude='node_modules/.cache'
+          remote_path: ${{ secrets.O2SWITCH_PATH }}
+          remote_host: ${{ secrets.O2SWITCH_HOST }}
+          remote_user: ${{ secrets.O2SWITCH_USERNAME }}
+          remote_key: ${{ secrets.O2SWITCH_KEY }}
+          remote_port: ${{ secrets.O2SWITCH_PORT || 22 }}
+
+      - name: Restart application
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.O2SWITCH_HOST }}
+          username: ${{ secrets.O2SWITCH_USERNAME }}
+          key: ${{ secrets.O2SWITCH_KEY }}
+          port: ${{ secrets.O2SWITCH_PORT || 22 }}
+          script: |
+            cd ${{ secrets.O2SWITCH_PATH }}/backend
+            npm ci --omit=dev --ignore-scripts 2>/dev/null
+            pm2 restart ecosystem.config.js 2>/dev/null || pm2 start server.js --name edusmart-api 2>/dev/null
