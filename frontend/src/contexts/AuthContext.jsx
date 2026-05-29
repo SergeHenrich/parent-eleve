@@ -21,12 +21,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       const savedToken = localStorage.getItem('edusmart_token')
-      
+
       if (savedToken) {
         try {
           // Vérifier la validité du token
           const response = await authAPI.verifyToken()
-          
+
           if (response.data.valid) {
             setUser(response.data.user)
             setToken(savedToken)
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
           setToken(null)
         }
       }
-      
+
       setLoading(false)
     }
 
@@ -53,17 +53,17 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setLoading(true)
-      
+
       const response = await authAPI.login({ email, password })
-      
+
       if (response.data.success) {
         const { token: newToken, user: userData } = response.data
-        
+
         // Sauvegarder le token
         localStorage.setItem('edusmart_token', newToken)
         setToken(newToken)
         setUser(userData)
-        
+
         return { success: true, user: userData }
       } else {
         throw new Error(response.data.error || 'Erreur de connexion')
@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }) => {
         currentPassword,
         newPassword
       })
-      
+
       if (response.data.success) {
         toast.success('Mot de passe modifié avec succès')
         return { success: true }

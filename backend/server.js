@@ -10,6 +10,7 @@ const gradesRoutes = require('./routes/grades');
 const absencesRoutes = require('./routes/absences');
 const messagesRoutes = require('./routes/messages');
 const notificationsRoutes = require('./routes/notifications');
+const usersRoutes = require('./routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -46,6 +47,7 @@ app.use('/api/grades', gradesRoutes);
 app.use('/api/absences', absencesRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/notifications', notificationsRoutes);
+app.use('/api/users', usersRoutes);
 
 // Route de santé
 app.get('/api/health', (req, res) => {

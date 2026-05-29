@@ -2,18 +2,19 @@
 
 ## 📊 Métriques cibles
 
-| Métrique | Cible | Actuel | Status |
-|----------|-------|--------|--------|
-| First Contentful Paint (FCP) | <2s | ~800ms | ✅ |
-| Largest Contentful Paint (LCP) | <2.5s | ~1.2s | ✅ |
-| Cumulative Layout Shift (CLS) | <0.1 | 0.05 | ✅ |
-| Time to Interactive (TTI) | <3.5s | ~2.1s | ✅ |
-| Bundle Size | <500KB | ~250KB | ✅ |
-| 3G Simulation | <3s | ~2.8s | ✅ |
+| Métrique                       | Cible  | Actuel | Status |
+| ------------------------------ | ------ | ------ | ------ |
+| First Contentful Paint (FCP)   | <2s    | ~800ms | ✅     |
+| Largest Contentful Paint (LCP) | <2.5s  | ~1.2s  | ✅     |
+| Cumulative Layout Shift (CLS)  | <0.1   | 0.05   | ✅     |
+| Time to Interactive (TTI)      | <3.5s  | ~2.1s  | ✅     |
+| Bundle Size                    | <500KB | ~250KB | ✅     |
+| 3G Simulation                  | <3s    | ~2.8s  | ✅     |
 
 ## 🚀 Frontend Optimisations
 
 ### Code Splitting
+
 ```javascript
 // App.jsx
 const Login = React.lazy(() => import('./pages/Auth/Login'))
@@ -29,10 +30,11 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard/Dashboard'))
 ```
 
 ### Image Optimization
+
 ```javascript
 // Utiliser des formats modernes
-<img 
-  src="image.webp" 
+<img
+  src="image.webp"
   alt="description"
   loading="lazy"
   width="100"
@@ -40,7 +42,7 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard/Dashboard'))
 />
 
 // Responsive images
-<img 
+<img
   srcSet="small.webp 480w, large.webp 1024w"
   sizes="(max-width: 600px) 100vw, 50vw"
   src="large.webp"
@@ -48,14 +50,19 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard/Dashboard'))
 ```
 
 ### Memoization
+
 ```javascript
 // Éviter les re-renders inutiles
-const MemoizedComponent = React.memo(({ data }) => {
-  return <div>{data}</div>
-}, (prevProps, nextProps) => prevProps.data === nextProps.data)
+const MemoizedComponent = React.memo(
+  ({ data }) => {
+    return <div>{data}</div>;
+  },
+  (prevProps, nextProps) => prevProps.data === nextProps.data,
+);
 ```
 
 ### CSS Optimization
+
 ```css
 /* Tailwind purge */
 /* Tailwind supprime les classes inutilisées en production */
@@ -66,6 +73,7 @@ const MemoizedComponent = React.memo(({ data }) => {
 ```
 
 ### Bundle Analysis
+
 ```bash
 # Voir la composition du bundle
 npm run build -- --analyze
@@ -80,6 +88,7 @@ npm run build -- --analyze
 ## ⚡ Backend Optimisations
 
 ### Database Indexes
+
 ```sql
 -- Indexes pour les requêtes rapides
 CREATE INDEX idx_users_email ON users(email);
@@ -96,11 +105,14 @@ CREATE INDEX idx_absences_eleve_date ON absences(eleve_id, date_absence);
 ```
 
 ### Query Optimization
+
 ```javascript
 // ❌ Mauvais - N+1 queries
-const students = await query('SELECT * FROM eleves');
+const students = await query("SELECT * FROM eleves");
 for (let student of students.rows) {
-  const grades = await query('SELECT * FROM notes WHERE eleve_id = $1', [student.id]);
+  const grades = await query("SELECT * FROM notes WHERE eleve_id = $1", [
+    student.id,
+  ]);
   // N+1 queries!
 }
 
@@ -113,11 +125,12 @@ const result = await query(`
 ```
 
 ### Connection Pooling
+
 ```javascript
 // backend/models/database.js
 const pool = new Pool({
-  max: 20,           // Max connections
-  min: 5,            // Min idle connections
+  max: 20, // Max connections
+  min: 5, // Min idle connections
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
@@ -126,6 +139,7 @@ const pool = new Pool({
 ```
 
 ### Caching
+
 ```javascript
 // Express cache middleware
 const NodeCache = require('node-cache');
@@ -134,7 +148,7 @@ const cache = new NodeCache({ stdTTL: 600 }); // 10 min
 app.get('/api/students', (req, res) => {
   const cached = cache.get('students');
   if (cached) return res.json(cached);
-  
+
   const result = await query('SELECT * FROM eleves');
   cache.set('students', result);
   res.json(result);
@@ -145,9 +159,10 @@ cache.del('students'); // Après INSERT/UPDATE/DELETE
 ```
 
 ### Compression
+
 ```javascript
 // server.js
-const compression = require('compression');
+const compression = require("compression");
 app.use(compression());
 
 // Gzip: 80% réduction de taille
@@ -155,14 +170,15 @@ app.use(compression());
 ```
 
 ### Rate Limiting
+
 ```javascript
 // Déjà implémenté dans server.js
-const rateLimit = require('express-rate-limit');
+const rateLimit = require("express-rate-limit");
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,                  // 100 requêtes
-  message: 'Trop de requêtes'
+  max: 100, // 100 requêtes
+  message: "Trop de requêtes",
 });
 
 app.use(limiter);
@@ -171,6 +187,7 @@ app.use(limiter);
 ## 🧪 Outils de Testing
 
 ### Frontend Performance
+
 ```bash
 # Lighthouse
 npm install -g lighthouse
@@ -185,6 +202,7 @@ lighthouse http://localhost:5173 --view
 ```
 
 ### Backend Performance
+
 ```bash
 # Artillery pour load testing
 npm install -g artillery
@@ -195,7 +213,7 @@ config:
   phases:
     - duration: 10
       arrivalRate: 10
-      
+
 artillery run load-test.yml
 
 # k6 pour monitoring
@@ -204,6 +222,7 @@ k6 run script.js
 ```
 
 ### Database Performance
+
 ```sql
 -- Analyser les requêtes lentes
 EXPLAIN ANALYZE
@@ -220,6 +239,7 @@ WHERE schemaname NOT IN ('pg_catalog', 'information_schema');
 ## 📈 Monitoring en Production
 
 ### Application Monitoring
+
 ```javascript
 // New Relic, Sentry, DataDog
 import * as Sentry from "@sentry/node";
@@ -233,6 +253,7 @@ Sentry.init({
 ```
 
 ### Database Monitoring
+
 ```javascript
 // Logs de requêtes lentes
 // PostgreSQL: log_min_duration_statement
@@ -245,6 +266,7 @@ tail -f /var/log/postgresql/postgresql.log | grep -i "duration"
 ```
 
 ### Infrastructure Monitoring
+
 - CloudWatch (AWS)
 - Datadog
 - New Relic
@@ -253,6 +275,7 @@ tail -f /var/log/postgresql/postgresql.log | grep -i "duration"
 ## 🎯 Checklist d'optimisation
 
 ### Frontend
+
 - [ ] Code splitting (lazy loading)
 - [ ] Images optimisées
 - [ ] CSS minifié
@@ -265,6 +288,7 @@ tail -f /var/log/postgresql/postgresql.log | grep -i "duration"
 - [ ] Font optimization
 
 ### Backend
+
 - [ ] Database indexes
 - [ ] Connection pooling
 - [ ] Query optimization
@@ -277,6 +301,7 @@ tail -f /var/log/postgresql/postgresql.log | grep -i "duration"
 - [ ] Graceful shutdown
 
 ### Infrastructure
+
 - [ ] Load balancer
 - [ ] Auto-scaling
 - [ ] CDN pour les assets

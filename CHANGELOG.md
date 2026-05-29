@@ -5,12 +5,14 @@
 ### ✨ Nouvelles fonctionnalités
 
 #### Authentification
+
 - Connexion sécurisée avec JWT
 - Gestion des rôles (Parent, Élève)
 - Token refresh automatique
 - Déconnexion sécurisée
 
 #### Tableau de bord
+
 - Vue d'ensemble des élèves/résultats
 - Affichage des notes récentes
 - Suivi des absences
@@ -18,6 +20,7 @@
 - Dernières notifications
 
 #### Gestion des notes
+
 - Consultation par élève
 - Filtrage par trimestre et matière
 - Affichage des moyennes
@@ -25,6 +28,7 @@
 - Commentaires des enseignants
 
 #### Suivi des absences
+
 - Liste complète des absences
 - Justification des absences
 - Filtrage par mois/année
@@ -32,6 +36,7 @@
 - Motif de l'absence
 
 #### Messagerie
+
 - Envoi/réception de messages
 - Marquage comme lu
 - Suppression de messages
@@ -39,6 +44,7 @@
 - Notifications de messages
 
 #### Notifications
+
 - Alertes d'absence injustifiée
 - Résultats disponibles
 - Réunions parents
@@ -46,6 +52,7 @@
 - Historique complet
 
 #### Profil utilisateur
+
 - Consultation des infos
 - Modification du profil
 - Changement de mot de passe
@@ -53,6 +60,7 @@
 - Déconnexion
 
 ### 🎨 Améliorations UI/UX
+
 - Interface responsive (mobile, tablet, desktop)
 - Thème cohérent avec Tailwind CSS
 - Icônes Lucide React
@@ -61,6 +69,7 @@
 - Dark mode ready (framework)
 
 ### ⚡ Optimisations
+
 - Code splitting avec React lazy()
 - Vite pour build rapide
 - Compression des bundles
@@ -69,6 +78,7 @@
 - Lazy loading des images
 
 ### 🔒 Sécurité
+
 - JWT authentication
 - Bcrypt hashing (rounds: 12)
 - CORS configured
@@ -79,6 +89,7 @@
 - HTTPS ready
 
 ### 📚 Documentation
+
 - README.md complet
 - API.md documentation
 - CONTRIBUTING.md guidelines
@@ -86,6 +97,7 @@
 - CHANGELOG.md (ce fichier)
 
 ### 🧪 Tests
+
 - Authentification validée
 - Routes protégées testées
 - API endpoints vérifiés
@@ -97,6 +109,7 @@
 ## Planification futures
 
 ### Version 1.1.0
+
 - [ ] Export notes en PDF
 - [ ] Bulletin interactif
 - [ ] Graphiques de progression
@@ -105,6 +118,7 @@
 - [ ] Favoris/bookmarks
 
 ### Version 1.2.0
+
 - [ ] Appels vidéo parent-enseignant
 - [ ] Partage de documents
 - [ ] Formulaires dynamiques
@@ -113,6 +127,7 @@
 - [ ] Offline support (PWA)
 
 ### Version 2.0.0
+
 - [ ] Module Admin
 - [ ] Module Enseignant
 - [ ] Dashboard analytique
@@ -127,6 +142,7 @@
 ## Notes
 
 **Environnement de développement:**
+
 - Node.js 18+
 - PostgreSQL 12+
 - React 18.2+

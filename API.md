@@ -10,9 +10,11 @@ Hébergée sur `http://localhost:5000/api` en développement.
 ### Endpoints d'authentification
 
 #### POST /auth/login
+
 Connexion utilisateur (parent ou élève).
 
 **Request:**
+
 ```json
 {
   "email": "parent@edusmart.cm",
@@ -21,6 +23,7 @@ Connexion utilisateur (parent ou élève).
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -36,20 +39,24 @@ Connexion utilisateur (parent ou élève).
 ```
 
 **Comptes de test:**
+
 - Parent: `parent@edusmart.cm` / `parent123`
 - Élève: `eleve@edusmart.cm` / `eleve123`
 
 ---
 
 #### GET /auth/verify
+
 Vérifier la validité du token JWT.
 
 **Headers:**
+
 ```
 Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 {
   "valid": true,
@@ -60,9 +67,11 @@ Authorization: Bearer {token}
 ---
 
 #### POST /auth/logout
+
 Déconnexion de l'utilisateur.
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -75,9 +84,11 @@ Déconnexion de l'utilisateur.
 ## Élèves
 
 ### GET /api/students
+
 Récupérer la liste des élèves (pour un parent) ou les infos de l'élève connecté.
 
 **Response (200):**
+
 ```json
 {
   "eleves": [
@@ -100,13 +111,16 @@ Récupérer la liste des élèves (pour un parent) ou les infos de l'élève con
 ## Notes
 
 ### GET /api/grades/eleve/:eleveId
+
 Récupérer les notes d'un élève avec filtres optionnels.
 
 **Query Parameters:**
+
 - `trimestre` (number): 1, 2 ou 3
 - `matiere` (number): ID de la matière
 
 **Response (200):**
+
 ```json
 {
   "notes": [
@@ -138,9 +152,11 @@ Récupérer les notes d'un élève avec filtres optionnels.
 ## Absences
 
 ### GET /api/absences/eleve/:eleveId
+
 Récupérer les absences d'un élève.
 
 **Query Parameters:**
+
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 - `justifiee` (boolean)
@@ -148,6 +164,7 @@ Récupérer les absences d'un élève.
 - `annee` (number)
 
 **Response (200):**
+
 ```json
 {
   "absences": [
@@ -171,9 +188,11 @@ Récupérer les absences d'un élève.
 ---
 
 ### PUT /api/absences/:absenceId/justifier
+
 Justifier une absence.
 
 **Request:**
+
 ```json
 {
   "motif": "Certificat médical",
@@ -182,6 +201,7 @@ Justifier une absence.
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -194,14 +214,17 @@ Justifier une absence.
 ## Messages
 
 ### GET /api/messages
+
 Récupérer les messages de l'utilisateur.
 
 **Query Parameters:**
+
 - `type`: 'all', 'received', 'sent', 'unread'
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 
 **Response (200):**
+
 ```json
 {
   "messages": [
@@ -225,9 +248,11 @@ Récupérer les messages de l'utilisateur.
 ---
 
 ### POST /api/messages
+
 Envoyer un nouveau message.
 
 **Request:**
+
 ```json
 {
   "destinataire_id": 2,
@@ -238,6 +263,7 @@ Envoyer un nouveau message.
 ```
 
 **Response (201):**
+
 ```json
 {
   "success": true,
@@ -256,9 +282,11 @@ Envoyer un nouveau message.
 ---
 
 ### PUT /api/messages/:messageId/marquer-lu
+
 Marquer un message comme lu.
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -269,9 +297,11 @@ Marquer un message comme lu.
 ---
 
 ### DELETE /api/messages/:messageId
+
 Supprimer un message.
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -284,15 +314,18 @@ Supprimer un message.
 ## Notifications
 
 ### GET /api/notifications
+
 Récupérer les notifications de l'utilisateur.
 
 **Query Parameters:**
+
 - `lu` (boolean)
 - `type`: 'absence', 'note', 'message', 'reunion', 'general'
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 
 **Response (200):**
+
 ```json
 {
   "notifications": [
@@ -316,9 +349,11 @@ Récupérer les notifications de l'utilisateur.
 ---
 
 ### GET /api/notifications/resume/statistiques
+
 Récupérer un résumé des notifications.
 
 **Response (200):**
+
 ```json
 {
   "resume": {
@@ -337,9 +372,11 @@ Récupérer un résumé des notifications.
 ---
 
 ### PUT /api/notifications/:notificationId/marquer-lue
+
 Marquer une notification comme lue.
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -352,9 +389,11 @@ Marquer une notification comme lue.
 ## Santé de l'API
 
 ### GET /api/health
+
 Vérifier l'état de l'API.
 
 **Response (200):**
+
 ```json
 {
   "status": "OK",
@@ -368,16 +407,16 @@ Vérifier l'état de l'API.
 
 ## Codes d'erreur
 
-| Code | Description |
-|------|-------------|
-| 200 | Succès |
-| 201 | Créé |
-| 400 | Requête invalide |
-| 401 | Non authentifié / Token expiré |
-| 403 | Non autorisé |
-| 404 | Non trouvé |
-| 429 | Trop de requêtes |
-| 500 | Erreur serveur |
+| Code | Description                    |
+| ---- | ------------------------------ |
+| 200  | Succès                         |
+| 201  | Créé                           |
+| 400  | Requête invalide               |
+| 401  | Non authentifié / Token expiré |
+| 403  | Non autorisé                   |
+| 404  | Non trouvé                     |
+| 429  | Trop de requêtes               |
+| 500  | Erreur serveur                 |
 
 ---
 
@@ -399,6 +438,7 @@ X-RateLimit-Reset: 1639568400
 ### Variables d'environnement
 
 Backend (.env):
+
 ```
 PORT=5000
 NODE_ENV=development
@@ -411,6 +451,7 @@ JWT_SECRET=edusmart_super_secret_key_2026
 ```
 
 Frontend (.env):
+
 ```
 VITE_API_URL=http://localhost:5000/api
 ```
@@ -418,6 +459,7 @@ VITE_API_URL=http://localhost:5000/api
 ### Démarrage
 
 **Backend:**
+
 ```bash
 cd backend
 npm install
@@ -425,6 +467,7 @@ npm run dev
 ```
 
 **Frontend:**
+
 ```bash
 cd frontend
 npm install

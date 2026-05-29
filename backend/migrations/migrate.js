@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { query } = require('../models/database');
 const bcrypt = require('bcryptjs');
 
@@ -135,7 +136,7 @@ async function insertMockData() {
     `, ['parent@edusmart.cm', parentPassword]);
 
     const eleveResult = await query(`
-      INSERT INTO users (email, password_hash, role, nom, prenom)
+      INSERT INTO users (email, password_hash, role, nom, prenom, telephone)
       VALUES ($1, $2, 'eleve', 'Mballa', 'Sarah', '+237677123457')
       ON CONFLICT (email) DO NOTHING
       RETURNING id

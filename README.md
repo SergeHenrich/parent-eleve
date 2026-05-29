@@ -22,13 +22,13 @@ EDUSMART-CM est une plateforme web de gestion scolaire développée pour le Mini
 
 ### Stack technique
 
-| Couche | Technologies |
-|--------|-------------|
-| **Frontend** | React 18 + Vite + Tailwind CSS |
-| **Backend** | Node.js + Express.js |
-| **Base de données** | PostgreSQL |
-| **Authentification** | JWT + bcrypt |
-| **Styling** | Tailwind CSS + Lucide Icons |
+| Couche               | Technologies                   |
+| -------------------- | ------------------------------ |
+| **Frontend**         | React 18 + Vite + Tailwind CSS |
+| **Backend**          | Node.js + Express.js           |
+| **Base de données**  | PostgreSQL                     |
+| **Authentification** | JWT + bcrypt                   |
+| **Styling**          | Tailwind CSS + Lucide Icons    |
 
 ### Structure du projet
 
@@ -98,6 +98,7 @@ npm run migrate
 ### 4. Démarrer les serveurs
 
 **Terminal 1 - Backend:**
+
 ```bash
 cd backend
 npm run dev
@@ -105,6 +106,7 @@ npm run dev
 ```
 
 **Terminal 2 - Frontend:**
+
 ```bash
 cd frontend
 npm run dev
@@ -113,49 +115,56 @@ npm run dev
 
 ## 👤 Comptes de test
 
-| Rôle | Email | Mot de passe |
-|------|-------|-------------|
-| Parent | `parent@edusmart.cm` | `parent123` |
-| Élève | `eleve@edusmart.cm` | `eleve123` |
+| Rôle   | Email                | Mot de passe |
+| ------ | -------------------- | ------------ |
+| Parent | `parent@edusmart.cm` | `parent123`  |
+| Élève  | `eleve@edusmart.cm`  | `eleve123`   |
 
 ## 📚 Fonctionnalités implémentées
 
 ### ✅ Authentification
+
 - Login sécurisé avec JWT
 - Refresh token automatique
 - Protection des routes
 - Gestion des rôles (parent/élève)
 
 ### ✅ Dashboard
+
 - Statistiques rapides (élèves, moyenne, absences)
 - Notes récentes
 - Absences récentes
 - Notifications non lues
 
 ### ✅ Gestion des notes
+
 - Consultation par trimestre
 - Filtrage par matière
 - Affichage des moyennes
 - Historique complet
 
 ### ✅ Suivi des absences
+
 - Liste avec justification
 - Filtrage par mois/année
 - Statistiques (justifiées vs non justifiées)
 
 ### ✅ Messagerie
+
 - Envoi/réception de messages
 - Marquage comme lu
 - Suppression de messages
 - Notifications en temps réel
 
 ### ✅ Notifications
+
 - Alertes d'absence injustifiée
 - Résultats disponibles
 - Messages reçus
 - SMS/Email intégrés (simulés)
 
 ### ✅ Profil utilisateur
+
 - Consultation des informations
 - Modification du profil
 - Changement de mot de passe
@@ -164,11 +173,13 @@ npm run dev
 ## 📱 Responsive Design
 
 L'application est entièrement responsive:
+
 - **Desktop**: Sidebar + contenu
 - **Tablet**: Navigation adaptée
 - **Mobile**: Navigation en pied de page
 
 Testé sur:
+
 - ✅ Chrome/Firefox/Safari (desktop)
 - ✅ Émulateur Android (Pixel 4)
 - ✅ Émulateur iOS (iPhone 12)
@@ -176,6 +187,7 @@ Testé sur:
 ## ⚡ Performance
 
 ### Optimisations implémentées
+
 - Code splitting avec lazy loading
 - Compression des bundles (Vite)
 - Caching des assets
@@ -183,6 +195,7 @@ Testé sur:
 - Images optimisées
 
 ### Temps de chargement
+
 - **Première charge**: ~600ms (réseau standard)
 - **Interactions**: <200ms
 - **3G simulé**: <3s ✅
@@ -190,6 +203,7 @@ Testé sur:
 ## 🔒 Sécurité
 
 ### Mesures de sécurité
+
 - ✅ HTTPS (production)
 - ✅ JWT avec secret fort
 - ✅ Hachage bcrypt (rounds: 12)
@@ -225,12 +239,14 @@ GET    /api/health                  # Santé de l'API
 ### Scénarios de test
 
 #### 1. Authentification
+
 - [x] Login avec compte valide
 - [x] Erreur avec compte invalide
 - [x] Token expiration
 - [x] Logout
 
 #### 2. Fonctionnalités parent
+
 - [x] Voir les élèves
 - [x] Consulter les notes des enfants
 - [x] Voir les absences
@@ -238,12 +254,14 @@ GET    /api/health                  # Santé de l'API
 - [x] Recevoir des notifications
 
 #### 3. Fonctionnalités élève
+
 - [x] Consulter ses notes
 - [x] Voir ses absences
 - [x] Envoyer des messages
 - [x] Consulter les notifications
 
 #### 4. Performance
+
 - [x] Chargement <3s sur 3G
 - [x] Taille page <500KB
 - [x] Offline resilience
@@ -251,6 +269,7 @@ GET    /api/health                  # Santé de l'API
 ## 🐛 Dépannage
 
 ### Backend ne démarre pas
+
 ```bash
 # Vérifier la connexion PostgreSQL
 psql -h localhost -U postgres -d edusmart_parent
@@ -264,6 +283,7 @@ npm install
 ```
 
 ### Frontend affiche "Erreur de connexion"
+
 ```bash
 # Vérifier que le backend est lancé
 curl http://localhost:5000/api/health
@@ -273,6 +293,7 @@ cat frontend/.env
 ```
 
 ### Migrations échouent
+
 ```bash
 # Recréer la base de données
 dropdb edusmart_parent
@@ -311,6 +332,7 @@ git show <commit-hash>
 **Variables d'environnement à configurer:**
 
 Backend:
+
 ```
 NODE_ENV=production
 DB_HOST=<rds-endpoint>
@@ -320,6 +342,7 @@ JWT_SECRET=<random-secure-key>
 ```
 
 Frontend:
+
 ```
 VITE_API_URL=https://api.edusmart-cm.com
 ```

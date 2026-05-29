@@ -12,6 +12,7 @@
 Format: `type: description`
 
 Types acceptés:
+
 - `feat`: Nouvelle fonctionnalité
 - `fix`: Correction de bug
 - `docs`: Documentation
@@ -22,6 +23,7 @@ Types acceptés:
 - `chore`: Tâches de maintenance
 
 Exemples:
+
 ```
 feat: Add student grade export to PDF
 fix: Correct absence date calculation
@@ -46,22 +48,22 @@ perf: Optimize grade loading with pagination
 
 ```javascript
 // Routes: /backend/routes/resource.js
-const express = require('express');
-const { authenticateToken, requireRole } = require('../middleware/auth');
+const express = require("express");
+const { authenticateToken, requireRole } = require("../middleware/auth");
 
 const router = express.Router();
 
 router.use(authenticateToken);
-router.use(requireRole(['parent', 'eleve']));
+router.use(requireRole(["parent", "eleve"]));
 
 // GET /api/resource
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     // Logique
     res.json({ success: true, data: [] });
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -72,49 +74,51 @@ module.exports = router;
 
 ```jsx
 // Pages: /frontend/src/pages/Resource/Resource.jsx
-import React, { useState, useEffect } from 'react'
-import Card from '../../components/UI/Card'
-import { resourceAPI } from '../../services/api'
-import toast from 'react-hot-toast'
+import React, { useState, useEffect } from "react";
+import Card from "../../components/UI/Card";
+import { resourceAPI } from "../../services/api";
+import toast from "react-hot-toast";
 
 export default function Resource() {
-  const [data, setData] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadData()
-  }, [])
+    loadData();
+  }, []);
 
   const loadData = async () => {
     try {
-      setLoading(true)
-      const response = await resourceAPI.getAll()
-      setData(response.data)
+      setLoading(true);
+      const response = await resourceAPI.getAll();
+      setData(response.data);
     } catch (error) {
-      toast.error('Error loading data')
+      toast.error("Error loading data");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Resource</h1>
       {/* Contenu */}
     </div>
-  )
+  );
 }
 ```
 
 ## 🎨 Conventions de style
 
 ### Backend
+
 - Indentation: 2 espaces
 - Camelcase pour les variables/fonctions
 - Noms explicites (`getUserById` au lieu de `getUser`)
 - Commenter les sections complexes
 
 ### Frontend
+
 - Indentation: 2 espaces
 - Composants: PascalCase
 - Fichiers: PascalCase (composants), camelCase (hooks)
@@ -123,12 +127,14 @@ export default function Resource() {
 ## 🧪 Testing
 
 ### Backend
+
 ```bash
 npm test                # Tous les tests
 npm test -- --watch    # Mode watch
 ```
 
 ### Frontend
+
 ```bash
 npm run lint           # ESLint
 npm test              # Jest
@@ -137,6 +143,7 @@ npm test              # Jest
 ## 📦 Dépendances
 
 Avant d'ajouter une dépendance:
+
 1. Vérifier s'il n'existe pas déjà
 2. Justifier l'ajout
 3. Vérifier la taille du bundle
@@ -170,6 +177,7 @@ Avant d'ajouter une dépendance:
 ## 📞 Questions?
 
 Consulter:
+
 - [API.md](./API.md)
 - [README.md](./README.md)
 - Issues GitHub

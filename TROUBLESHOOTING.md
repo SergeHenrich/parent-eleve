@@ -9,6 +9,7 @@
 **Cause:** PostgreSQL non connecté ou non en cours d'exécution
 
 **Solution:**
+
 ```bash
 # Vérifier l'état de PostgreSQL
 sudo service postgresql status
@@ -32,6 +33,7 @@ psql -h localhost -U postgres
 **Cause:** node_modules manquants
 
 **Solution:**
+
 ```bash
 cd backend
 rm -rf node_modules package-lock.json
@@ -48,6 +50,7 @@ npm run dev
 **Cause:** Variables d'environnement manquantes
 
 **Solution:**
+
 ```bash
 # Créer .env dans backend/
 echo 'JWT_SECRET=your_secret_key_here' >> .env
@@ -63,6 +66,7 @@ echo 'DB_USER=postgres' >> .env
 **Symptôme:** Port déjà utilisé
 
 **Solution:**
+
 ```bash
 # Linux/Mac
 lsof -i :5000
@@ -87,6 +91,7 @@ PORT=5001 npm run dev
 **Cause:** Fichier .env manquant dans frontend/
 
 **Solution:**
+
 ```bash
 cd frontend
 echo 'VITE_API_URL=http://localhost:5000/api' > .env
@@ -100,6 +105,7 @@ npm run dev
 **Symptôme:** Module introuvable après npm install
 
 **Solution:**
+
 ```bash
 cd frontend
 rm -rf node_modules package-lock.json
@@ -114,6 +120,7 @@ npm run dev
 **Cause:** Backend non lancé ou port différent
 
 **Solution:**
+
 ```bash
 # 1. Vérifier que backend est lancé
 curl http://localhost:5000/api/health
@@ -136,6 +143,7 @@ cd frontend && npm run dev
 **Cause:** Compte inexistant ou migrations non exécutées
 
 **Solution:**
+
 ```bash
 # Exécuter les migrations
 cd backend
@@ -155,6 +163,7 @@ npm run migrate
 **Cause:** Token expiré ou utilisateur non lié à un élève
 
 **Solution:**
+
 ```bash
 # 1. Se reconnecter
 # 2. Vérifier les données en DB
@@ -176,6 +185,7 @@ SELECT * FROM eleves;
 **Cause:** Mot de passe PostgreSQL incorrect
 
 **Solution:**
+
 ```bash
 # Réinitialiser le mot de passe
 sudo -u postgres psql
@@ -193,6 +203,7 @@ DB_PASSWORD=newpassword
 **Cause:** Base de données non créée
 
 **Solution:**
+
 ```bash
 # Créer la base
 createdb edusmart_parent
@@ -213,6 +224,7 @@ npm run migrate
 **Cause:** Tables non créées (migrations non exécutées)
 
 **Solution:**
+
 ```bash
 # Exécuter les migrations
 cd backend
@@ -230,6 +242,7 @@ psql edusmart_parent
 **Cause:** Schema BD incompatible avec le code
 
 **Solution:**
+
 ```bash
 # Recréer la DB proprement
 dropdb edusmart_parent
@@ -247,6 +260,7 @@ psql edusmart_parent < migrations/001_init.sql
 ### L'app est lente au démarrage
 
 **Diagnostic:**
+
 ```bash
 # 1. Vérifier la taille des bundles
 cd frontend
@@ -259,6 +273,7 @@ npm run build
 ```
 
 **Solutions:**
+
 - Réduire la taille des assets
 - Utiliser lazy loading
 - Compresser les images
@@ -269,6 +284,7 @@ npm run build
 ### API lente (>1000ms par requête)
 
 **Diagnostic:**
+
 ```bash
 # Vérifier les logs
 # Ajouter du timing dans les routes
@@ -280,6 +296,7 @@ console.log(`Query time: ${Date.now() - start}ms`);
 ```
 
 **Solutions:**
+
 - Ajouter des indexes DB
 - Optimiser les requêtes
 - Ajouter du caching
@@ -294,6 +311,7 @@ console.log(`Query time: ${Date.now() - start}ms`);
 **Cause:** Erreur serveur non gérée
 
 **Solution:**
+
 ```bash
 # Vérifier les logs backend
 # Vérifier la structure des données POST
@@ -310,6 +328,7 @@ curl -X POST http://localhost:5000/api/auth/login \
 **Cause:** Token expiré ou secret incorrect
 
 **Solution:**
+
 ```bash
 # Vérifier JWT_SECRET dans .env
 # Format du token: Bearer eyJhbGc...
@@ -323,6 +342,7 @@ curl -X POST http://localhost:5000/api/auth/login \
 ### Activer les logs détaillés
 
 **Backend:**
+
 ```javascript
 // backend/server.js
 if (process.env.DEBUG) {
@@ -335,6 +355,7 @@ DEBUG=true npm run dev
 ```
 
 **Frontend:**
+
 ```javascript
 // Partout
 if (process.env.VITE_DEBUG) {
@@ -350,6 +371,7 @@ VITE_DEBUG=true npm run dev
 ### Déboguer avec VS Code
 
 **.vscode/launch.json:**
+
 ```json
 {
   "version": "0.2.0",
@@ -371,6 +393,7 @@ VITE_DEBUG=true npm run dev
 ## 🆘 Si tout échoue
 
 1. **Nettoyer complètement:**
+
 ```bash
 # Backend
 cd backend
@@ -385,6 +408,7 @@ npm install
 ```
 
 2. **Redémarrer les services:**
+
 ```bash
 # Redémarrer PostgreSQL
 sudo service postgresql restart
@@ -394,6 +418,7 @@ npm run dev
 ```
 
 3. **Vérifier les logs:**
+
 ```bash
 # Frontend: F12 > Console
 # Backend: Terminal où npm run dev est lancé
@@ -401,6 +426,7 @@ npm run dev
 ```
 
 4. **Contacter le support:**
+
 - Email: support@nexatec-solutions.cm
 - Inclure:
   - Version Node/npm

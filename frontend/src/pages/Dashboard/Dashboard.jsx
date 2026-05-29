@@ -8,14 +8,13 @@ import Badge from '../../components/UI/Badge'
 import {
   TrendingUp,
   Users,
-  Clock,
-  MessageSquare,
   AlertCircle,
+  MessageSquare,
   ArrowRight
 } from 'lucide-react'
-import { api, studentsAPI, gradesAPI, absencesAPI } from '../../services/api'
+import { studentsAPI, gradesAPI, absencesAPI, messagesAPI } from '../../services/api'
 import toast from 'react-hot-toast'
-import { formatDistanceToNow } from 'date-fns'
+import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 export default function Dashboard() {
@@ -27,11 +26,7 @@ export default function Dashboard() {
     recentGrades: [],
     recentAbsences: [],
     unreadMessages: 0,
-    stats: {
-      totalStudents: 0,
-      averageGrade: 0,
-      unexcusedAbsences: 0
-    }
+    averageGrade: null
   })
 
   useEffect(() => {
@@ -39,22 +34,34 @@ export default function Dashboard() {
       try {
         setLoading(true)
 
-        // Récupérer les élèves
         const elevesResponse = await studentsAPI.getStudents()
         const eleves = elevesResponse.data.eleves || []
 
-        // Récupérer les notes récentes
         let recentGrades = []
+        let averageGrade = null
         if (eleves.length > 0) {
           try {
-            const gradesResponse = await gradesAPI.getGrades(eleves[0].id)
-            recentGrades = (gradesResponse.data.notes || []).slice(0, 5)
+            const gradesResponse = await gradesAPI.getGrades(eleves[0].id, { trimestre: 1 })
+            const notesGrouped = gradesResponse.data.notes || {}
+            const moyennes = gradesResponse.data.moyennes || {}
+            const trim1 = moyennes[1]
+            if (trim1 && trim1.moyenne_generale) {
+              averageGrade = trim1.moyenne_generale
+            }
+            const allNotes = []
+            Object.values(notesGrouped).forEach(trim => {
+              Object.values(trim).forEach(matiere => {
+                (matiere.notes || []).forEach(n => {
+                  allNotes.push({ ...n, matiere: matiere.matiere_info.nom })
+                })
+              })
+            })
+            recentGrades = allNotes.sort((a, b) => new Date(b.date_evaluation) - new Date(a.date_evaluation)).slice(0, 5)
           } catch (e) {
             console.log('Erreur chargement notes:', e.message)
           }
         }
 
-        // Récupérer les absences récentes
         let recentAbsences = []
         if (eleves.length > 0) {
           try {
@@ -65,15 +72,20 @@ export default function Dashboard() {
           }
         }
 
+        let unreadMessages = 0
+        try {
+          const messagesResponse = await messagesAPI.getMessages({ lu: 'false' })
+          unreadMessages = messagesResponse.data.statistiques?.messages_non_lus || 0
+        } catch (e) {
+          console.log('Erreur chargement messages:', e.message)
+        }
+
         setData({
           eleves,
           recentGrades,
           recentAbsences,
-          stats: {
-            totalStudents: eleves.length,
-            averageGrade: calculateAverage(recentGrades),
-            unexcusedAbsences: recentAbsences.filter(a => !a.justifiee).length
-          }
+          unreadMessages,
+          averageGrade
         })
       } catch (error) {
         console.error('Erreur dashboard:', error)
@@ -86,12 +98,6 @@ export default function Dashboard() {
     loadDashboardData()
   }, [])
 
-  const calculateAverage = (grades) => {
-    if (grades.length === 0) return 0
-    const sum = grades.reduce((acc, g) => acc + (g.note || 0), 0)
-    return (sum / grades.length).toFixed(2)
-  }
-
   if (loading) {
     return <LoadingSpinner />
   }
@@ -99,52 +105,43 @@ export default function Dashboard() {
   const stats = [
     {
       title: 'Élèves',
-      value: data.stats.totalStudents,
+      value: data.eleves.length,
       icon: Users,
-      color: 'blue'
+      color: 'text-blue-600 bg-blue-100'
     },
     {
       title: 'Moyenne générale',
-      value: `${data.stats.averageGrade}/20`,
+      value: data.averageGrade ? `${data.averageGrade}/20` : 'N/A',
       icon: TrendingUp,
-      color: 'green'
+      color: 'text-green-600 bg-green-100'
     },
     {
       title: 'Absences injustifiées',
-      value: data.stats.unexcusedAbsences,
+      value: data.recentAbsences.filter(a => !a.justifiee).length,
       icon: AlertCircle,
-      color: 'red'
+      color: 'text-red-600 bg-red-100'
     },
     {
       title: 'Messages non lus',
       value: data.unreadMessages,
       icon: MessageSquare,
-      color: 'purple'
+      color: 'text-purple-600 bg-purple-100'
     }
   ]
 
-  const iconColors = {
-    blue: 'text-blue-600 bg-blue-100',
-    green: 'text-green-600 bg-green-100',
-    red: 'text-red-600 bg-red-100',
-    purple: 'text-purple-600 bg-purple-100'
-  }
-
   return (
     <div className="space-y-6">
-      {/* En-tête */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">
           Bienvenue, {user?.prenom}!
         </h1>
         <p className="text-gray-600 mt-2">
-          {user?.role === 'parent' 
-            ? 'Suivi du parcours scolaire de vos enfants' 
+          {user?.role === 'parent'
+            ? 'Suivi du parcours scolaire de vos enfants'
             : 'Consulter vos résultats et votre parcours'}
         </p>
       </div>
 
-      {/* Statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, idx) => {
           const Icon = stat.icon
@@ -155,7 +152,7 @@ export default function Dashboard() {
                   <p className="text-gray-600 text-sm font-medium">{stat.title}</p>
                   <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
                 </div>
-                <div className={`p-3 rounded-lg ${iconColors[stat.color]}`}>
+                <div className={`p-3 rounded-lg ${stat.color}`}>
                   <Icon className="w-6 h-6" />
                 </div>
               </div>
@@ -165,7 +162,6 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Notes récentes */}
         <Card>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">Notes récentes</h2>
@@ -182,8 +178,8 @@ export default function Dashboard() {
               {data.recentGrades.map((grade, idx) => (
                 <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                   <div>
-                    <p className="font-medium text-gray-900">{grade.matiere || 'Matière'}</p>
-                    <p className="text-sm text-gray-600">{grade.type_evaluation || 'Évaluation'}</p>
+                    <p className="font-medium text-gray-900">{grade.matiere}</p>
+                    <p className="text-sm text-gray-500">{grade.type_evaluation}</p>
                   </div>
                   <Badge variant={grade.note >= 12 ? 'success' : grade.note >= 10 ? 'warning' : 'error'}>
                     {grade.note}/20
@@ -196,7 +192,6 @@ export default function Dashboard() {
           )}
         </Card>
 
-        {/* Absences récentes */}
         <Card>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">Absences récentes</h2>
@@ -213,8 +208,10 @@ export default function Dashboard() {
               {data.recentAbsences.map((absence, idx) => (
                 <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                   <div>
-                    <p className="font-medium text-gray-900">{absence.date_absence}</p>
-                    <p className="text-sm text-gray-600">{absence.motif || 'Sans motif'}</p>
+                    <p className="font-medium text-gray-900">
+                      {format(new Date(absence.date_absence), 'dd/MM/yyyy')}
+                    </p>
+                    <p className="text-sm text-gray-500">{absence.motif || 'Sans motif'}</p>
                   </div>
                   <Badge variant={absence.justifiee ? 'success' : 'error'}>
                     {absence.justifiee ? 'Justifiée' : 'Non justifiée'}

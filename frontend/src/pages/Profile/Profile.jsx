@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Card from '../../components/UI/Card'
 import Button from '../../components/UI/Button'
 import FormInput from '../../components/UI/FormInput'
 import Alert from '../../components/UI/Alert'
-import LoadingSpinner from '../../components/UI/LoadingSpinner'
 import { useAuth } from '../../contexts/AuthContext'
 import { usersAPI } from '../../services/api'
 import toast from 'react-hot-toast'
-import { User } from 'lucide-react'
+import { User, Lock, LogOut } from 'lucide-react'
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { user, logout } = useAuth()
+  const { user, logout, changePassword } = useAuth()
   const [loading, setLoading] = useState(false)
   const [editing, setEditing] = useState(false)
   const [profile, setProfile] = useState({
@@ -22,45 +21,59 @@ export default function Profile() {
     telephone: user?.telephone || ''
   })
   const [errors, setErrors] = useState({})
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: ''
+  })
 
   const validateForm = () => {
     const newErrors = {}
-    
     if (!profile.nom.trim()) newErrors.nom = 'Nom requis'
     if (!profile.prenom.trim()) newErrors.prenom = 'Prénom requis'
     if (!profile.email.trim()) newErrors.email = 'Email requis'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) {
       newErrors.email = 'Email invalide'
     }
-    
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleUpdate = async (e) => {
     e.preventDefault()
-    
     if (!validateForm()) return
-
     setLoading(true)
     try {
       await usersAPI.updateProfile(profile)
       toast.success('Profil mis à jour avec succès')
       setEditing(false)
     } catch (error) {
-      toast.error('Erreur lors de la mise à jour du profil')
+      toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault()
+    if (!passwordData.currentPassword || !passwordData.newPassword) {
+      toast.error('Tous les champs sont requis')
+      return
+    }
+    if (passwordData.newPassword.length < 6) {
+      toast.error('Le nouveau mot de passe doit faire au moins 6 caractères')
+      return
+    }
+    const result = await changePassword(passwordData.currentPassword, passwordData.newPassword)
+    if (result.success) {
+      setShowPasswordForm(false)
+      setPasswordData({ currentPassword: '', newPassword: '' })
     }
   }
 
   const handleLogout = () => {
     logout()
     navigate('/login')
-  }
-
-  const handleChangePassword = () => {
-    navigate('/profile/change-password')
   }
 
   return (
@@ -73,7 +86,6 @@ export default function Profile() {
         <p className="text-gray-600 mt-2">Gérez vos informations personnelles</p>
       </div>
 
-      {/* Informations de profil */}
       <Card>
         <div className="flex items-start justify-between mb-6">
           <div>
@@ -81,11 +93,7 @@ export default function Profile() {
             <p className="text-sm text-gray-600 mt-1">Rôle: {user?.role === 'parent' ? 'Parent' : 'Élève'}</p>
           </div>
           {!editing && (
-            <Button 
-              variant="secondary" 
-              size="sm"
-              onClick={() => setEditing(true)}
-            >
+            <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
               Modifier
             </Button>
           )}
@@ -97,46 +105,36 @@ export default function Profile() {
               <FormInput
                 label="Nom"
                 value={profile.nom}
-                onChange={(e) => setProfile({...profile, nom: e.target.value})}
+                onChange={(e) => setProfile({ ...profile, nom: e.target.value })}
                 error={errors.nom}
                 required
               />
               <FormInput
                 label="Prénom"
                 value={profile.prenom}
-                onChange={(e) => setProfile({...profile, prenom: e.target.value})}
+                onChange={(e) => setProfile({ ...profile, prenom: e.target.value })}
                 error={errors.prenom}
                 required
               />
             </div>
-
             <FormInput
               label="Email"
               type="email"
               value={profile.email}
-              onChange={(e) => setProfile({...profile, email: e.target.value})}
+              onChange={(e) => setProfile({ ...profile, email: e.target.value })}
               error={errors.email}
               required
             />
-
             <FormInput
               label="Téléphone"
               value={profile.telephone}
-              onChange={(e) => setProfile({...profile, telephone: e.target.value})}
+              onChange={(e) => setProfile({ ...profile, telephone: e.target.value })}
             />
-
             <div className="flex gap-3">
-              <Button 
-                variant="primary"
-                type="submit"
-                disabled={loading}
-              >
+              <Button variant="primary" type="submit" disabled={loading}>
                 {loading ? 'Enregistrement...' : 'Enregistrer'}
               </Button>
-              <Button 
-                variant="secondary"
-                onClick={() => setEditing(false)}
-              >
+              <Button variant="secondary" onClick={() => setEditing(false)}>
                 Annuler
               </Button>
             </div>
@@ -161,29 +159,47 @@ export default function Profile() {
         )}
       </Card>
 
-      {/* Actions de sécurité */}
       <Card>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Sécurité</h2>
-        <div className="space-y-3">
-          <Button 
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <Lock className="w-5 h-5 text-gray-600" /> Sécurité
+        </h2>
+        {!showPasswordForm ? (
+          <Button
             variant="secondary"
             className="w-full text-left"
-            onClick={handleChangePassword}
+            onClick={() => setShowPasswordForm(true)}
           >
             Modifier le mot de passe
           </Button>
-        </div>
+        ) : (
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <FormInput
+              label="Mot de passe actuel"
+              type="password"
+              value={passwordData.currentPassword}
+              onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+              required
+            />
+            <FormInput
+              label="Nouveau mot de passe"
+              type="password"
+              value={passwordData.newPassword}
+              onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+              required
+              placeholder="Min 6 caractères"
+            />
+            <div className="flex gap-3">
+              <Button variant="primary" type="submit">Changer le mot de passe</Button>
+              <Button variant="secondary" onClick={() => setShowPasswordForm(false)}>Annuler</Button>
+            </div>
+          </form>
+        )}
       </Card>
 
-      {/* Actions */}
       <Card className="bg-gray-50">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Actions</h2>
-        <Button 
-          variant="danger"
-          onClick={handleLogout}
-          className="w-full"
-        >
-          Se déconnecter
+        <Button variant="danger" onClick={handleLogout} className="w-full">
+          <LogOut className="w-4 h-4 inline mr-2" /> Se déconnecter
         </Button>
       </Card>
     </div>

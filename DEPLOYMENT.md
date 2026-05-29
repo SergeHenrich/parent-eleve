@@ -3,6 +3,7 @@
 ## 🌐 Environnements
 
 ### Development (Local)
+
 ```bash
 npm run dev  # Backend et Frontend en mode développement
 ```
@@ -42,6 +43,7 @@ npm run build
 ### 3. Variables d'environnement
 
 **Backend (.env)**
+
 ```env
 NODE_ENV=production
 PORT=5000
@@ -79,6 +81,7 @@ TWILIO_FROM_NUMBER=+1234567890
 ```
 
 **Frontend (.env.production)**
+
 ```env
 VITE_API_URL=https://api.edusmart-cm.com
 VITE_APP_NAME=EduSmart
@@ -90,17 +93,20 @@ VITE_APP_VERSION=1.0.0
 ### Heroku (Recommandé pour MVP)
 
 #### Procfile
+
 ```
 web: node backend/server.js
 ```
 
 #### Buildpack
+
 ```bash
 heroku buildpacks:add heroku/nodejs
 heroku buildpacks:add https://github.com/mars/create-react-app-buildpack.git
 ```
 
 #### Déploiement
+
 ```bash
 # Variables d'environnement
 heroku config:set NODE_ENV=production
@@ -125,6 +131,7 @@ git push heroku main
    - Security group: ports 80, 443, 5000
 
 2. **Installer Node.js et PostgreSQL**
+
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
@@ -132,6 +139,7 @@ sudo apt-get install -y postgresql postgresql-contrib
 ```
 
 3. **Cloner et déployer**
+
 ```bash
 cd /app
 git clone <repo>
@@ -149,18 +157,19 @@ npm run build
 ```
 
 4. **Utiliser Nginx comme reverse proxy**
+
 ```nginx
 server {
     listen 80;
     server_name edusmart-cm.com;
-    
+
     location / {
         proxy_pass http://localhost:5173;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
     }
-    
+
     location /api {
         proxy_pass http://localhost:5000;
     }
@@ -168,6 +177,7 @@ server {
 ```
 
 5. **Configurer PM2** (process manager)
+
 ```bash
 npm install -g pm2
 
@@ -207,6 +217,7 @@ Configurer les variables d'environnement dans les paramètres Vercel.
 ## 🔒 Sécurité en production
 
 ### SSL/TLS
+
 ```bash
 # Let's Encrypt avec Nginx
 sudo apt-get install certbot python3-certbot-nginx
@@ -214,6 +225,7 @@ sudo certbot certonly --nginx -d edusmart-cm.com
 ```
 
 ### Firewall
+
 ```bash
 sudo ufw enable
 sudo ufw allow 22/tcp
@@ -222,6 +234,7 @@ sudo ufw allow 443/tcp
 ```
 
 ### Backups
+
 ```bash
 # Database backup
 pg_dump -U postgres edusmart_parent > backup_$(date +%Y%m%d).sql
@@ -231,6 +244,7 @@ pg_dump -U postgres edusmart_parent > backup_$(date +%Y%m%d).sql
 ```
 
 ### Monitoring
+
 - Mettre en place Sentry pour les erreurs
 - CloudWatch/Datadog pour la performance
 - Notifications Slack pour les alertes
@@ -250,6 +264,7 @@ app.use(Sentry.Handlers.errorHandler());
 ## 📊 Monitoring et Logs
 
 ### PM2 Monitoring
+
 ```bash
 pm2 monit
 pm2 logs
@@ -257,6 +272,7 @@ pm2 save
 ```
 
 ### Logs d'application
+
 ```bash
 # Backend logs
 tail -f /app/logs/backend.log
@@ -280,21 +296,21 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-      
+          node-version: "18"
+
       - name: Install dependencies
         run: npm ci --prefix backend && npm ci --prefix frontend
-      
+
       - name: Build frontend
         run: npm run build --prefix frontend
-      
+
       - name: Deploy
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}

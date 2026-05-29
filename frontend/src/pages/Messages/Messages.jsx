@@ -24,7 +24,9 @@ export default function Messages() {
   const loadMessages = async () => {
     try {
       setLoading(true)
-      const response = await messagesAPI.getMessages({ type: filter })
+      const params = { type: filter === 'unread' ? 'all' : filter }
+      if (filter === 'unread') params.lu = 'false'
+      const response = await messagesAPI.getMessages(params)
       setMessages(response.data.messages || [])
     } catch (error) {
       toast.error('Erreur lors du chargement des messages')
@@ -67,7 +69,7 @@ export default function Messages() {
           </h1>
           <p className="text-gray-600 mt-2">Communiquez avec l'établissement</p>
         </div>
-        <Button 
+        <Button
           variant="primary"
           onClick={() => navigate('/messages/new')}
           className="flex items-center gap-2"
@@ -76,16 +78,14 @@ export default function Messages() {
         </Button>
       </div>
 
-      {/* Filtres */}
       <div className="flex gap-2 flex-wrap">
         {['all', 'received', 'sent', 'unread'].map(f => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === f
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            className={`px-4 py-2 rounded-lg transition-colors ${filter === f
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
             {f === 'all' ? 'Tous' : f === 'received' ? 'Reçus' : f === 'sent' ? 'Envoyés' : 'Non lus'}
@@ -93,36 +93,40 @@ export default function Messages() {
         ))}
       </div>
 
-      {/* Messages */}
       {messages.length > 0 ? (
         <div className="space-y-3">
           {messages.map(msg => (
-            <Card key={msg.id} className={`${!msg.lu ? 'border-l-4 border-blue-600 bg-blue-50' : ''}`}>
+            <Card
+              key={msg.id}
+              className={`cursor-pointer hover:shadow-lg transition-shadow ${!msg.lu ? 'border-l-4 border-blue-600 bg-blue-50' : ''}`}
+              onClick={() => navigate(`/messages/${msg.id}`)}
+            >
               <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-gray-900">{msg.sujet}</h3>
+                    <h3 className="font-bold text-gray-900 truncate">{msg.sujet}</h3>
                     {!msg.lu && <Badge variant="info">Non lu</Badge>}
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
-                    De: {msg.expediteur_nom} | À: {msg.destinataire_nom}
+                    De: {msg.expediteur?.prenom} {msg.expediteur?.nom}
+                    {msg.direction === 'sent' && ` → À: ${msg.destinataire?.prenom} ${msg.destinataire?.nom}`}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
                     {formatDistanceToNow(new Date(msg.created_at), { locale: fr, addSuffix: true })}
                   </p>
                   <p className="text-gray-700 mt-3 line-clamp-2">{msg.contenu}</p>
                 </div>
-                <div className="flex gap-2">
-                  {!msg.lu && (
+                <div className="flex gap-2 flex-shrink-0">
+                  {!msg.lu && msg.direction === 'received' && (
                     <button
-                      onClick={() => markAsRead(msg.id)}
+                      onClick={(e) => { e.stopPropagation(); markAsRead(msg.id) }}
                       className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                     >
                       Marquer lu
                     </button>
                   )}
                   <button
-                    onClick={() => deleteMessage(msg.id)}
+                    onClick={(e) => { e.stopPropagation(); deleteMessage(msg.id) }}
                     className="text-xs px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                   >
                     Supprimer
