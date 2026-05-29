@@ -115,6 +115,7 @@ export const messagesAPI = {
 // Services pour les notifications
 export const notificationsAPI = {
   getAll: (params = {}) => api.get("/notifications", { params }),
+  getNotifications: (params = {}) => api.get("/notifications", { params }),
   getById: (notificationId) => api.get(`/notifications/${notificationId}`),
   markAsRead: (notificationId) =>
     api.put(`/notifications/${notificationId}/marquer-lue`),

@@ -147,11 +147,12 @@ router.get('/:messageId', async (req, res) => {
               m.expediteur_id, m.destinataire_id, m.eleve_concerne_id,
               exp.nom as expediteur_nom, exp.prenom as expediteur_prenom, exp.role as expediteur_role, exp.email as expediteur_email,
               dest.nom as destinataire_nom, dest.prenom as destinataire_prenom, dest.role as destinataire_role, dest.email as destinataire_email,
-              el.nom as eleve_nom, el.prenom as eleve_prenom, el.classe as eleve_classe, el.matricule as eleve_matricule
+              e.nom as eleve_nom, e.prenom as eleve_prenom, el.classe as eleve_classe, el.matricule as eleve_matricule
        FROM messages m
        JOIN users exp ON m.expediteur_id = exp.id
        JOIN users dest ON m.destinataire_id = dest.id
        LEFT JOIN eleves el ON m.eleve_concerne_id = el.id
+       LEFT JOIN users e ON el.user_id = e.id
        WHERE m.id = $1 AND (m.expediteur_id = $2 OR m.destinataire_id = $2)`,
       [messageId, req.user.id]
     );
