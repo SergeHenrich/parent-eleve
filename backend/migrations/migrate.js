@@ -12,7 +12,7 @@ async function createTables() {
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
-        role VARCHAR(20) NOT NULL CHECK (role IN ('parent', 'eleve', 'enseignant', 'admin')),
+        role VARCHAR(20) NOT NULL DEFAULT 'parent',
         nom VARCHAR(100) NOT NULL,
         prenom VARCHAR(100) NOT NULL,
         telephone VARCHAR(20),
@@ -22,6 +22,10 @@ async function createTables() {
         is_active BOOLEAN DEFAULT true
       )
     `);
+
+    // Mettre à jour la contrainte de rôle si la table existait déjà
+    await query(`ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check`);
+    await query(`ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('parent', 'eleve', 'enseignant', 'admin'))`);
 
     // Table des élèves
     await query(`
