@@ -16,18 +16,22 @@ export default function Messages() {
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 })
 
   useEffect(() => {
-    loadMessages()
+    loadMessages(1)
   }, [filter])
 
-  const loadMessages = async () => {
+  const loadMessages = async (page = pagination.page) => {
     try {
       setLoading(true)
-      const params = { type: filter === 'unread' ? 'all' : filter }
+      const params = { type: filter === 'unread' ? 'all' : filter, page, limit: 20 }
       if (filter === 'unread') params.lu = 'false'
       const response = await messagesAPI.getMessages(params)
       setMessages(response.data.messages || [])
+      if (response.data.pagination) {
+        setPagination(response.data.pagination)
+      }
     } catch (error) {
       toast.error('Erreur lors du chargement des messages')
       console.error(error)
@@ -39,7 +43,7 @@ export default function Messages() {
   const markAsRead = async (messageId) => {
     try {
       await messagesAPI.markAsRead(messageId)
-      loadMessages()
+      loadMessages(pagination.page)
     } catch (error) {
       toast.error('Erreur lors de la mise à jour du message')
     }
@@ -49,7 +53,7 @@ export default function Messages() {
     try {
       await messagesAPI.deleteMessage(messageId)
       toast.success('Message supprimé')
-      loadMessages()
+      loadMessages(pagination.page)
     } catch (error) {
       toast.error('Erreur lors de la suppression')
     }
@@ -108,8 +112,10 @@ export default function Messages() {
                     {!msg.lu && <Badge variant="info">Non lu</Badge>}
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
-                    De: {msg.expediteur?.prenom} {msg.expediteur?.nom}
-                    {msg.direction === 'sent' && ` → À: ${msg.destinataire?.prenom} ${msg.destinataire?.nom}`}
+                    {msg.direction === 'sent'
+                      ? `À: ${msg.destinataire?.prenom} ${msg.destinataire?.nom}`
+                      : `De: ${msg.expediteur?.prenom} ${msg.expediteur?.nom}`
+                    }
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
                     {formatDistanceToNow(new Date(msg.created_at), { locale: fr, addSuffix: true })}
@@ -138,6 +144,34 @@ export default function Messages() {
         </div>
       ) : (
         <Alert type="info" message="Aucun message pour le moment" />
+      )}
+
+      {pagination.pages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-4">
+          <button
+            onClick={() => loadMessages(pagination.page - 1)}
+            disabled={pagination.page <= 1}
+            className="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ← Précédent
+          </button>
+          {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(p => (
+            <button
+              key={p}
+              onClick={() => loadMessages(p)}
+              className={`px-3 py-1 rounded ${p === pagination.page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            onClick={() => loadMessages(pagination.page + 1)}
+            disabled={pagination.page >= pagination.pages}
+            className="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Suivant →
+          </button>
+        </div>
       )}
     </div>
   )

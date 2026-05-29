@@ -375,81 +375,51 @@ router.delete('/:messageId', async (req, res) => {
 // Route pour obtenir les contacts (utilisateurs avec qui on peut échanger)
 router.get('/contacts/liste', async (req, res) => {
   try {
-    // Pour un parent : peut contacter les enseignants et l'administration
-    // Pour un élève : peut contacter les enseignants, l'administration et ses parents
-    
-    let contactsResult;
-    
+    let contacts = [];
+
+    // Récupérer les utilisateurs admin et enseignants (communs à tous)
+    const etablissementResult = await query(
+      `SELECT id, nom, prenom, role, email
+       FROM users
+       WHERE role IN ('admin', 'enseignant') AND is_active = true
+       ORDER BY role, nom`
+    );
+    contacts.push(...etablissementResult.rows);
+
     if (req.user.role === 'parent') {
-      // Mock des enseignants et administration
-      contactsResult = {
-        rows: [
-          {
-            id: 999,
-            nom: 'Administration',
-            prenom: 'Lycée Bilingue',
-            role: 'admin',
-            email: 'admin@lyceebilingueyaounde.cm'
-          },
-          {
-            id: 998,
-            nom: 'Mbarga',
-            prenom: 'Paul',
-            role: 'enseignant',
-            email: 'p.mbarga@lyceebilingueyaounde.cm'
-          },
-          {
-            id: 997,
-            nom: 'Nkomo',
-            prenom: 'Marie',
-            role: 'enseignant',
-            email: 'm.nkomo@lyceebilingueyaounde.cm'
-          }
-        ]
-      };
+      // Pour un parent : ajouter ses enfants (élèves)
+      const enfantsResult = await query(
+        `SELECT u.id, u.nom, u.prenom, u.role, u.email
+         FROM users u
+         JOIN eleves e ON u.id = e.user_id
+         WHERE e.parent_id = $1 AND u.is_active = true`,
+        [req.user.id]
+      );
+      contacts.push(...enfantsResult.rows);
+
     } else if (req.user.role === 'eleve') {
-      // Récupérer le parent + mock des enseignants
+      // Pour un élève : ajouter son parent
       const parentResult = await query(
         `SELECT u.id, u.nom, u.prenom, u.role, u.email
          FROM users u
          JOIN eleves e ON u.id = e.parent_id
-         WHERE e.user_id = $1`,
+         WHERE e.user_id = $1 AND u.is_active = true`,
         [req.user.id]
       );
-
-      const contacts = parentResult.rows;
-      
-      // Ajouter les enseignants et administration (mock)
-      contacts.push(
-        {
-          id: 999,
-          nom: 'Administration',
-          prenom: 'Lycée Bilingue',
-          role: 'admin',
-          email: 'admin@lyceebilingueyaounde.cm'
-        },
-        {
-          id: 998,
-          nom: 'Mbarga',
-          prenom: 'Paul',
-          role: 'enseignant',
-          email: 'p.mbarga@lyceebilingueyaounde.cm'
-        },
-        {
-          id: 997,
-          nom: 'Nkomo',
-          prenom: 'Marie',
-          role: 'enseignant',
-          email: 'm.nkomo@lyceebilingueyaounde.cm'
-        }
-      );
-
-      contactsResult = { rows: contacts };
+      contacts.push(...parentResult.rows);
     }
+
+    // Dédupliquer par id (un admin peut aussi être parent, etc.)
+    const seen = new Set();
+    contacts = contacts.filter(c => {
+      const dup = seen.has(c.id);
+      seen.add(c.id);
+      return !dup;
+    });
 
     res.json({
       success: true,
-      contacts: contactsResult.rows.map(contact => ({
+      contacts: contacts.map(contact => ({
         id: contact.id,
         nom: contact.nom,
         prenom: contact.prenom,

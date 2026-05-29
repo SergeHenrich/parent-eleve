@@ -6,13 +6,13 @@ async function createTables() {
   try {
     console.log('🔄 Création des tables...');
 
-    // Table des utilisateurs (parents et élèves)
+    // Table des utilisateurs (parents, élèves, enseignants, admin)
     await query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
-        role VARCHAR(20) NOT NULL CHECK (role IN ('parent', 'eleve')),
+        role VARCHAR(20) NOT NULL CHECK (role IN ('parent', 'eleve', 'enseignant', 'admin')),
         nom VARCHAR(100) NOT NULL,
         prenom VARCHAR(100) NOT NULL,
         telephone VARCHAR(20),
@@ -126,6 +126,8 @@ async function insertMockData() {
     // Hachage des mots de passe
     const parentPassword = await bcrypt.hash('parent123', 12);
     const elevePassword = await bcrypt.hash('eleve123', 12);
+    const adminPassword = await bcrypt.hash('admin123', 12);
+    const enseignantPassword = await bcrypt.hash('enseignant123', 12);
 
     // Insertion des utilisateurs
     const parentResult = await query(`
@@ -141,6 +143,24 @@ async function insertMockData() {
       ON CONFLICT (email) DO NOTHING
       RETURNING id
     `, ['eleve@edusmart.cm', elevePassword]);
+
+    await query(`
+      INSERT INTO users (email, password_hash, role, nom, prenom)
+      VALUES ($1, $2, 'admin', 'Administration', 'Lycée Bilingue')
+      ON CONFLICT (email) DO NOTHING
+    `, ['admin@edusmart.cm', adminPassword]);
+
+    await query(`
+      INSERT INTO users (email, password_hash, role, nom, prenom)
+      VALUES ($1, $2, 'enseignant', 'Mbarga', 'Paul')
+      ON CONFLICT (email) DO NOTHING
+    `, ['paul.mbarga@edusmart.cm', enseignantPassword]);
+
+    await query(`
+      INSERT INTO users (email, password_hash, role, nom, prenom)
+      VALUES ($1, $2, 'enseignant', 'Nkomo', 'Marie')
+      ON CONFLICT (email) DO NOTHING
+    `, ['marie.nkomo@edusmart.cm', enseignantPassword]);
 
     // Récupération des IDs
     let parentId, eleveUserId;
@@ -226,11 +246,17 @@ async function insertMockData() {
       `, [eleveId, date, justifiee, motif]);
     }
 
-    // Insertion d'un message
-    await query(`
-      INSERT INTO messages (expediteur_id, destinataire_id, sujet, contenu, eleve_concerne_id)
-      VALUES ($1, $2, 'Réunion parents d''élèves', 'Bonjour, nous organisons une réunion parents d''élèves le 30 mai 2026 à 15h. Votre présence est souhaitée.', $3)
-    `, [1, parentId, eleveId]);
+    // Récupération de l'ID admin
+    const adminResult = await query('SELECT id FROM users WHERE email = $1', ['admin@edusmart.cm']);
+    const adminId = adminResult.rows[0]?.id;
+
+    // Insertion d'un message de l'administration vers le parent
+    if (adminId) {
+      await query(`
+        INSERT INTO messages (expediteur_id, destinataire_id, sujet, contenu, eleve_concerne_id)
+        VALUES ($1, $2, 'Réunion parents d''élèves', 'Bonjour, nous organisons une réunion parents d''élèves le 30 mai 2026 à 15h. Votre présence est souhaitée.', $3)
+      `, [adminId, parentId, eleveId]);
+    }
 
     // Insertion d'une notification
     await query(`
@@ -242,6 +268,9 @@ async function insertMockData() {
     console.log('📧 Comptes créés:');
     console.log('   Parent: parent@edusmart.cm / parent123');
     console.log('   Élève: eleve@edusmart.cm / eleve123');
+    console.log('   Admin: admin@edusmart.cm / admin123');
+    console.log('   Enseignant: paul.mbarga@edusmart.cm / enseignant123');
+    console.log('   Enseignant: marie.nkomo@edusmart.cm / enseignant123');
 
   } catch (error) {
     console.error('❌ Erreur lors de l\'insertion des données:', error);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Card from '../../components/UI/Card'
 import Button from '../../components/UI/Button'
 import FormInput from '../../components/UI/FormInput'
@@ -11,6 +11,7 @@ import { Send, ArrowLeft } from 'lucide-react'
 
 export default function NewMessage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [contacts, setContacts] = useState([])
   const [eleves, setEleves] = useState([])
   const [loading, setLoading] = useState(true)
@@ -24,6 +25,14 @@ export default function NewMessage() {
   const [errors, setErrors] = useState({})
 
   useEffect(() => {
+    // Remplir depuis l'état passé par MessageDetail (Répondre)
+    if (location.state?.destinataire_id) {
+      setFormData(prev => ({
+        ...prev,
+        destinataire_id: String(location.state.destinataire_id),
+        sujet: location.state.sujet || ''
+      }))
+    }
     loadData()
   }, [])
 
@@ -41,6 +50,17 @@ export default function NewMessage() {
       setLoading(false)
     }
   }
+
+  // Regrouper les contacts par rôle
+  const groupedContacts = contacts.reduce((acc, c) => {
+    const role = c.role === 'admin' ? 'Administration'
+      : c.role === 'enseignant' ? 'Enseignants'
+      : c.role === 'parent' ? 'Parents'
+      : 'Élèves'
+    if (!acc[role]) acc[role] = []
+    acc[role].push(c)
+    return acc
+  }, {})
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -119,10 +139,14 @@ export default function NewMessage() {
               required
             >
               <option value="">-- Sélectionner un destinataire --</option>
-              {contacts.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.nom_complet} ({c.role === 'admin' ? 'Administration' : c.role === 'enseignant' ? 'Enseignant' : c.role})
-                </option>
+              {Object.entries(groupedContacts).map(([roleLabel, roleContacts]) => (
+                <optgroup key={roleLabel} label={roleLabel}>
+                  {roleContacts.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.nom_complet}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             {errors.destinataire_id && (
