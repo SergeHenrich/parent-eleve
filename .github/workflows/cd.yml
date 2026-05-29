@@ -27,24 +27,19 @@ jobs:
         run: npm ci --omit=dev
         working-directory: backend
 
-      - name: Déployer via rsync over SSH
-        uses: burnett01/rsync-deployments@7.0.2
+      - name: Déployer via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          switches: -avz --delete --exclude='.env' --exclude='node_modules/.cache'
-          remote_path: ${{ secrets.O2SWITCH_PATH }}
-          remote_host: ${{ secrets.O2SWITCH_HOST }}
-          remote_user: ${{ secrets.O2SWITCH_USERNAME }}
-          remote_key: ${{ secrets.O2SWITCH_KEY }}
-          remote_port: ${{ secrets.O2SWITCH_PORT || 22 }}
-
-      - name: Restart application
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.O2SWITCH_HOST }}
-          username: ${{ secrets.O2SWITCH_USERNAME }}
-          key: ${{ secrets.O2SWITCH_KEY }}
-          port: ${{ secrets.O2SWITCH_PORT || 22 }}
-          script: |
-            cd ${{ secrets.O2SWITCH_PATH }}/backend
-            npm ci --omit=dev --ignore-scripts 2>/dev/null
-            pm2 restart ecosystem.config.js 2>/dev/null || pm2 start server.js --name edusmart-api 2>/dev/null
+          server: ${{ secrets.O2SWITCH_FTP_SERVER }}
+          username: ${{ secrets.O2SWITCH_FTP_USERNAME }}
+          password: ${{ secrets.O2SWITCH_FTP_PASSWORD }}
+          port: ${{ secrets.O2SWITCH_FTP_PORT || 21 }}
+          local-dir: ./
+          server-dir: ${{ secrets.O2SWITCH_FTP_PATH }}
+          exclude: |
+            .git/
+            .gitignore
+            .env
+            node_modules/
+            backend/node_modules/.cache
+            frontend/node_modules/
