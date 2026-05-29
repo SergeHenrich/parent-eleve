@@ -29,6 +29,7 @@ jobs:
           remote_host: ${{ secrets.O2SWITCH_HOST }}
           remote_user: ${{ secrets.O2SWITCH_USERNAME }}
           remote_key: ${{ secrets.O2SWITCH_KEY }}
+          remote_port: 21
 
       - name: Install & restart
         uses: appleboy/ssh-action@v1
@@ -36,6 +37,7 @@ jobs:
           host: ${{ secrets.O2SWITCH_HOST }}
           username: ${{ secrets.O2SWITCH_USERNAME }}
           key: ${{ secrets.O2SWITCH_KEY }}
+          port: 21
           script: |
             cd ${{ secrets.O2SWITCH_PATH }}
             npm install --prefix backend --omit=dev
