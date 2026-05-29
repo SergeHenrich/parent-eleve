@@ -40,6 +40,5 @@ jobs:
             .git/
             .gitignore
             .env
-            node_modules/
             backend/node_modules/.cache
             frontend/node_modules/
